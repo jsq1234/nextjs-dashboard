@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { Button } from "@/app/ui/button";
 import { updateInvoice } from "@/app/lib/actions";
+import { useFormState } from "react-dom";
 
 export default function EditInvoiceForm({
   invoice,
@@ -18,10 +19,11 @@ export default function EditInvoiceForm({
   invoice: InvoiceForm;
   customers: CustomerField[];
 }) {
+  const initialState = { message: null, errors: {} };
   const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
-
+  const [state, dispatch] = useFormState(updateInvoiceWithId, initialState);
   return (
-    <form action={updateInvoiceWithId}>
+    <form action={dispatch}>
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Customer Name */}
         <div className="mb-4">
@@ -46,6 +48,14 @@ export default function EditInvoiceForm({
             </select>
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           </div>
+          {state.errors?.customerId?.map((error, idx) => (
+            <p
+              key={idx}
+              className="block ml-4 mt-1 text-red-600 font-semibold text-sm"
+            >
+              {error}
+            </p>
+          ))}
         </div>
 
         {/* Invoice Amount */}
@@ -67,6 +77,14 @@ export default function EditInvoiceForm({
               <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
           </div>
+          {state.errors?.amount?.map((error, idx) => (
+            <p
+              key={idx}
+              className="block ml-4 mt-1 text-red-600 font-semibold text-sm"
+            >
+              {error}
+            </p>
+          ))}
         </div>
 
         {/* Invoice Status */}
@@ -111,6 +129,21 @@ export default function EditInvoiceForm({
             </div>
           </div>
         </fieldset>
+        <div id="pending-error" aria-live="polite" aria-atomic="true">
+          {state.errors?.status?.map((error, idx) => (
+            <p
+              key={idx}
+              className="block ml-4 mt-1 text-red-600 font-semibold text-sm"
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+        {state.errors && state.message && (
+          <p className="block ml-4 mt-8 text-center text-red-600 font-semibold text-sm">
+            {state.message}
+          </p>
+        )}
       </div>
       <div className="mt-6 flex justify-end gap-4">
         <Link
